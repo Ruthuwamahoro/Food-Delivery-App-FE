@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Footer from "@/components/Footer";
-import ChatBot from "@/components/ChatBot";
 import Navigation from "@/components/Nav";
 
 
@@ -20,11 +18,8 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-background text-foreground"
       >
-        <div className="min-h-screen flex flex-col">
+        {/* <Navigation /> */}
         {children}
-        <ChatBot />
-        <Footer />
-        </div>
       </body>
     </html>
   );
