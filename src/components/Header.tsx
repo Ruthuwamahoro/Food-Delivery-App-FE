@@ -3,8 +3,18 @@ import { playfair } from "@/data/fonts"
 import { ShoppingCart } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useState } from "react"
+import LoginPage from "./Login-page"
 
 export default function Header() {
+  const [isLoggedIn, isDisplayLoggedIn] = useState(false)
+  if(isLoggedIn){
+    return(
+      <>
+      <LoginPage loginOpen={isLoggedIn} setLoginOpen={isDisplayLoggedIn} />
+      </>
+    )
+  }
   return (
     <header className="w-full">
       <nav className="w-full bg-gray-900 shadow-md">
@@ -24,6 +34,12 @@ export default function Header() {
               >
                 Home
               </Link>
+              <span
+                className="text-white hover:text-gray-300 font-medium transition-colors duration-200 hover:underline-offset-4 hover:font-semibold cursor-pointer"
+                onClick={() => isDisplayLoggedIn(true)}
+              >
+                Login
+              </span>
               <Link
                 href="/cart" 
                 className="text-white hover:text-gray-300 font-medium transition-colors duration-200 hover:underline-offset-4 hover:font-semibold"
