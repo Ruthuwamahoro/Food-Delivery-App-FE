@@ -20,17 +20,17 @@ export default function Header() {
             <div className="hidden md:flex items-center gap-6 lg:gap-8">
               <Link
                 href="/" 
-                className="text-white hover:text-orange-600 font-medium transition-colors duration-200"
+                className="text-white hover:text-gray-300 font-medium transition-colors duration-200 hover:underline-offset-4 hover:font-semibold"
               >
                 Home
               </Link>
               <Link
                 href="/cart" 
-                className="text-white hover:text-orange-600 font-medium transition-colors duration-200"
+                className="text-white hover:text-gray-300 font-medium transition-colors duration-200 hover:underline-offset-4 hover:font-semibold"
               >
                 <ShoppingCart className="inline-block mr-1" size={18} />
-                <span className="relative text-xl text-red-500 font-semibold right-1 bottom-2">0</span>
-                Cart
+                <span className="relative text-sm text-red-500 font-semibold right-1 bottom-2">0</span>
+                <span className="text-xl">Cart</span>
               </Link>
             </div>
 
