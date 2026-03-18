@@ -56,7 +56,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   return (
     <div className="bg-white p-8">
       <span
-        className={`${playfair.className} block text-[5rem] leading-none text-gray-200 mb-4`}
+        className={`${playfair.className} block text-[5rem] leading-none text-gray-400 mb-4`}
       >
         "
       </span>
