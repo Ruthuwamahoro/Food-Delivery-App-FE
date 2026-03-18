@@ -83,7 +83,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 
 export default function Testimonials() {
   return (
-    <section className={`${dmSans.className} max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16`}>
+    <section className={`${dmSans.className} mb-24`}>
       <p className="text-[11px] font-medium tracking-[0.15em] uppercase text-gray-400 mb-2">
         Reviews
       </p>
@@ -91,7 +91,7 @@ export default function Testimonials() {
         What our <em>customers say</em>
       </h2>
 
-      <div className="grid md:grid-cols-3 divide-x divide-y md:divide-y-0 divide-gray-100 border border-gray-100 rounded-xl overflow-hidden">
+      <div className="grid md:grid-cols-3 divide-x divide-y md:divide-y-0 divide-gray-100 rounded-xl overflow-hidden">
         {testimonials.map((t) => (
           <TestimonialCard key={t.name} testimonial={t} />
         ))}
