@@ -31,6 +31,7 @@ import {
   CircleDot,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SUGGESTIONS } from "@/data/chatbot";
 
 interface Message {
   id: string;
@@ -38,11 +39,7 @@ interface Message {
   content: string;
 }
 
-const SUGGESTIONS = [
-  { icon: "🕐", text: "What's a quick weeknight dinner?" },
-  { icon: "🔄", text: "Substitute for heavy cream?" },
-  { icon: "🔥", text: "How do I know when oil is hot enough?" },
-];
+
 
 export default function ChatBot() {
   const [open, setOpen] = useState(false);
