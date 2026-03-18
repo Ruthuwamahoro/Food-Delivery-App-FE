@@ -22,51 +22,16 @@
 
 
 // components/Testimonials.tsx
+import { AvatarColor, Testimonial } from '@/types/testimonials'
 import { Playfair_Display, DM_Sans } from 'next/font/google'
+import { testimonials } from '@/data/testimonials'
 
 const playfair = Playfair_Display({ subsets: ['latin'] })
 const dmSans = DM_Sans({ subsets: ['latin'], weight: ['300', '400', '500'] })
 
-type AvatarColor = 'purple' | 'teal' | 'coral'
 
-interface Testimonial {
-  initials: string
-  name: string
-  role: string
-  time: string
-  color: AvatarColor
-  quote: string
-}
 
-const testimonials: Testimonial[] = [
-  {
-    initials: 'SK',
-    name: 'Sarah K.',
-    role: 'Home cook',
-    time: '3 months ago',
-    color: 'purple',
-    quote:
-      'The recipes on this site are amazing! I\'ve tried several and they all turned out delicious. Highly recommend to anyone looking to spice up their meal routine.',
-  },
-  {
-    initials: 'JD',
-    name: 'John D.',
-    role: 'Food enthusiast',
-    time: '1 month ago',
-    color: 'teal',
-    quote:
-      'I love how easy it is to find new recipes here. The instructions are clear and the results are always fantastic — even on weeknights.',
-  },
-  {
-    initials: 'ER',
-    name: 'Emily R.',
-    role: 'Recipe collector',
-    time: '2 weeks ago',
-    color: 'coral',
-    quote:
-      'This site has become my go-to for meal inspiration. The variety of recipes keeps me coming back every single week for something new.',
-  },
-]
+
 
 const avatarClasses: Record<AvatarColor, string> = {
   purple: 'bg-[#EEEDFE] text-[#3C3489]',
