@@ -22,29 +22,9 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { NAV } from "@/data/navs";
 
-const NAV = [
-  {
-    label: "Overview",
-    items: [
-      { href: "/admin",          icon: LayoutDashboard,  label: "Dashboard",  badge: null  },
-      { href: "/admin/orders",   icon: ShoppingBag,      label: "Orders",     badge: "12"  },
-    ],
-  },
-  {
-    label: "Catalogue",
-    items: [
-      { href: "/admin/recipes",  icon: UtensilsCrossed,  label: "Recipes",    badge: null  },
-    ],
-  },
-  {
-    label: "Manage",
-    items: [
-      { href: "/admin/customers",icon: Users,            label: "Customers",  badge: null  },
-      { href: "/admin/settings", icon: Settings,         label: "Settings",   badge: null  },
-    ],
-  },
-];
+
 
 function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const pathname = usePathname();
@@ -166,7 +146,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       <div className="lg:pl-64 flex flex-col min-h-screen">
 
-        {/* Top bar */}
         <header className="sticky top-0 z-20 h-14 bg-background border-b border-border flex items-center gap-4 px-4 sm:px-6">
           <button
             className="lg:hidden w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted text-muted-foreground"
