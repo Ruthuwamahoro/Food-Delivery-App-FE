@@ -164,7 +164,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-background">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Main content — offset by sidebar width on desktop */}
       <div className="lg:pl-64 flex flex-col min-h-screen">
 
         {/* Top bar */}
