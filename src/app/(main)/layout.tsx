@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navigation from "@/components/Nav";
+import ChatBot from "@/components/ChatBot";
+import Footer from "@/components/Footer";
 
 
 
