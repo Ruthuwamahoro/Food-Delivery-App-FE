@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Navigation from "@/components/Nav";
-import ChatBot from "@/components/ChatBot";
-import Footer from "@/components/Footer";
+import { Suspense } from "react";
+import OAuthCapture from "@/components/OAuthCapture";
+
 
 
 
@@ -16,11 +16,17 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  console.log("======================================================OAuthCapture rendered======================================================");
+
+  
   return (
     <html lang="en">
       <body className="bg-background text-foreground"
       >
-        {/* <Navigation /> */}
+        <Suspense fallback={null}>
+          <OAuthCapture />
+        </Suspense>
         {children}
       </body>
     </html>

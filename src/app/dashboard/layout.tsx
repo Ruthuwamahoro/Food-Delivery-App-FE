@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Footer from "@/components/Footer";
-import ChatBot from "@/components/ChatBot";
-import { Suspense } from "react";
-import OAuthCapture from "@/components/OAuthCapture";
+import AdminLayout from "@/components/Sidebar";
+
 
 
 
@@ -22,12 +20,8 @@ export default function RootLayout({
       <body className="bg-background text-foreground"
       >
         <div className="min-h-screen flex flex-col">
-        <Suspense fallback={null}>
-          <OAuthCapture />
-        </Suspense>
+        <AdminLayout children={children} />
         {children}
-        <ChatBot />
-        <Footer />
         </div>
       </body>
     </html>
