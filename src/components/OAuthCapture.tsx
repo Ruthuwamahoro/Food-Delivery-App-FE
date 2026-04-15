@@ -8,11 +8,8 @@ export default function OAuthCapture() {
   const captured = useRef(false); 
 
   useEffect(() => {
-
     const isOAuth = searchParams.get("oauth") === "success";
-    if (!isOAuth) {
-      return;
-    }
+    if (!isOAuth) return;
 
     const captureToken = async () => {
       try {
@@ -21,26 +18,18 @@ export default function OAuthCapture() {
           { credentials: "include" }
         );
 
-
-        if (!res.ok) {
-          return;
-        }
+        if (!res.ok) return;
 
         const data = await res.json();
 
-        if (!data.token) {
-          return;
-        }
+        if (!data.token) return;
+
         captured.current = true;
-
-        document.cookie = `auth-token=${data.token}; path=/; max-age=${
-          60 * 60 * 24 * 7
-        }; SameSite=Lax`;
-
+        localStorage.setItem("auth-token", data.token); // store in localStorage
 
         router.replace("/");
       } catch (err) {
-        console.error("💥 Error capturing token:", err);
+        console.error("Error capturing token:", err);
       }
     };
 
@@ -48,4 +37,4 @@ export default function OAuthCapture() {
   }, [searchParams]);
 
   return null;
-}
+} 

@@ -1,5 +1,5 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addItemToCart } from "@/services/foods/cart";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { addItemToCart, getCartItems } from "@/services/foods/cart";
 import { AddToCartItemPayload } from "@/types/cart";
 
 
@@ -16,4 +16,16 @@ export const useAddItemToCart = () => {
             queryClient.invalidateQueries({queryKey: CART_KEYS.all})
         }
     })
+}
+
+export const useGetAllCartItems = () => {
+    const { data, isPending, error} = useQuery({
+        queryKey: [CART_KEYS.all],
+        queryFn: getCartItems
+    })
+
+    return {
+        data, isPending, error
+    }
+
 }
