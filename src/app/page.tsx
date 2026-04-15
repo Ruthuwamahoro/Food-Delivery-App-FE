@@ -1,49 +1,153 @@
 "use client";
 import Image from "next/image";
-import { recipe } from "@/data/recipe";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PaginationDemo } from "@/components/Pagination";
 import Testimonials from "@/components/Testimonials";
 import { playfair } from "@/data/fonts";
-import { Search } from "lucide-react";
+import { Search, Clock, ShoppingCart, ChevronRight} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
+import { useGetAllFoods } from "@/hooks/foods/useGetAllFoods";
+import FoodCardSkeleton from "@/components/FoodSkeleton";
+import { Badge } from "@/components/ui/badge";
+import { useAddItemToCart } from "@/hooks/cart/useCart";
 
-interface Recipe {
-  id: number;
-  title: string;
+interface Food {
+  id: string;
+  name: string;
   description: string;
-  image: string;
-  category?: string;
-  time?: string;
-  difficulty?: string;
+  images: string[] | string;
+  price: number;
+  deliveryTime: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const getFirstImage = (images: string[] | string): string => {
+  if (Array.isArray(images)) return images[0] ?? "/placeholder.png";
+  return images ?? "/placeholder.png";
+};
+
+function FoodCard({ food }: { food: Food }) {
+  const router = useRouter();
+
+  const { mutate: addToCart, isPending } = useAddItemToCart();
+  const handleAddToCart = () => {
+    addToCart({
+      foodId: food.id,
+      quantity: 1,
+      price: food.price
+    },
+    {
+      onSuccess: () => console.log("added to cart"),
+      onError: (err) => console.error("failed to add to cart")
+    }
+  )
+  }
+
+  return (
+    <div className="bg-card flex flex-col border-b border-border group">
+      {/* Image */}
+      <div className="relative w-full h-52 bg-muted overflow-hidden">
+        <Image
+          src={getFirstImage(food.images)}
+          alt={food.name}
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          unoptimized
+        />
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+
+        {/* Price — bottom left over gradient */}
+        <Badge  className="absolute bottom-3 left-3 text-[13px] font-semibold text-black tracking-wide bg-amber-100">
+          RWF {food.price.toLocaleString()}
+        </Badge>
+
+        {/* Delivery time — bottom right */}
+        <span className="absolute bottom-3 right-3 flex items-center gap-1 text-[11px] font-medium text-white/90">
+          <Clock className="w-3 h-3" />
+          {food.deliveryTime} min
+        </span>
+      </div>
+
+      {/* Body */}
+      <div className="p-5 flex-1 flex flex-col gap-2">
+        <h2 className={`${playfair.className} text-lg font-normal text-foreground leading-snug`}>
+          {food.name}
+        </h2>
+        <p className="text-[13px] text-muted-foreground font-light leading-relaxed line-clamp-2 flex-1">
+          {food.description}
+        </p>
+      </div>
+
+      {/* Footer */}
+      <div className="px-5 py-4 border-t border-border flex items-center justify-between gap-3">
+        <button
+          onClick={() => router.push(`/recipe/${food.id}`)}
+          className="flex items-center gap-1 text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+        >
+          View recipe
+          <ChevronRight className="w-3.5 h-3.5" />
+        </button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-xs font-medium cursor-pointer shrink-0 gap-1.5"
+          onClick={handleAddToCart}
+          disabled={isPending}
+        >
+          <ShoppingCart className="w-3.5 h-3.5" />
+          {isPending ? "Adding..." : "Add to Cart"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="text-center py-20 flex flex-col items-center gap-3">
+      <p className="text-4xl">🍽️</p>
+      <p className="text-[15px] font-medium text-foreground">No recipes found</p>
+      <p className="text-[13px] text-muted-foreground">Try searching for something else.</p>
+    </div>
+  );
+}
+
+function ErrorState() {
+  return (
+    <div className="text-center py-20 flex flex-col items-center gap-3">
+      <p className="text-4xl">⚠️</p>
+      <p className="text-[15px] font-medium text-foreground">Something went wrong</p>
+      <p className="text-[13px] text-muted-foreground">Failed to load recipes. Please try again.</p>
+    </div>
+  );
 }
 
 export default function Home() {
-  const router = useRouter();
+  const { data, isLoading, error } = useGetAllFoods();
+  const foods: Food[] = data?.data ?? [];
+
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-
       <Header />
 
-      <p className="text-[11px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-1 pt-7">
-        Discover
-      </p>
-      <div>
-        <div>
-          <h1 className={`${playfair.className} text-4xl md:text-5xl font-normal text-foreground leading-tight mb-3`}>
+      {/* Hero text */}
+      <div className="pt-7 mb-8">
+        <p className="text-[11px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-2">
+          Discover
+        </p>
+        <h1 className={`${playfair.className} text-4xl md:text-5xl font-normal text-foreground leading-tight mb-3`}>
           Explore <em>recipes</em>
-          </h1>
-          <p className="text-[15px] text-muted-foreground font-light leading-relaxed mb-8 max-w-lg">
-            Fresh ideas for every meal. Browse our curated collection of chef-tested recipes.
-          </p>
-        </div>
+        </h1>
+        <p className="text-[15px] text-muted-foreground font-light leading-relaxed max-w-lg">
+          Fresh ideas for every meal. Browse our curated collection of chef-tested recipes.
+        </p>
       </div>
 
-
-      {/* Search bar */}
+      {/* Search */}
       <div className="flex gap-2 mb-10 max-w-lg">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -56,56 +160,38 @@ export default function Home() {
         <Button className="h-11 px-6 text-sm font-medium">Search</Button>
       </div>
 
-      <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-muted-foreground mb-4">
-        All recipes
-      </p>
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 divide-x divide-y md:divide-y-0 border border-border rounded-xl overflow-hidden mb-8">
-        {recipe.map((r: Recipe) => (
-          <div key={r.id} className="bg-card flex flex-col px-6 pt-3 border-b border-border">
-            <div className="relative w-full h-48 bg-muted">
-              <Image
-                src={r.image}
-                alt={r.title}
-                fill
-                className="object-cover"
-              />
-              {r.category && (
-                <span className="absolute top-3 left-3 text-[10px] font-medium tracking-wide uppercase bg-amber-50 text-amber-800 px-2 py-1 rounded">
-                  {r.category}
-                </span>
-              )}
-            </div>
-
-            <div className="p-5 flex-1">
-              <h2 className={`${playfair.className} text-lg font-normal text-foreground leading-snug mb-2`}>
-                {r.title}
-              </h2>
-              <p className="text-[13px] text-muted-foreground font-light leading-relaxed">
-                {r.description}
-              </p>
-              <Badge variant="outline" className="text-xs font-medium mt-3 border-none bg-gray-200 cursor-pointer"   onClick={() => router.push(`/recipe/${r.id}`)}>
-                View recipe
-              </Badge>
-            </div>
-
-            <div className="px-5 py-4 border-t border-border flex items-center justify-between">
-              {r.time && (
-                <span className="text-[11px] text-muted-foreground">
-                  {r.time}{r.difficulty ? ` · ${r.difficulty}` : ""}
-                </span>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs font-medium ml-auto cursor-pointer"
-              >
-                Add to cart
-              </Button>
-            </div>
-          </div>
-        ))}
+      {/* Section label */}
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-muted-foreground">
+          All recipes
+        </p>
+        {!isLoading && !error && foods.length > 0 && (
+          <p className="text-[11px] text-muted-foreground">
+            {foods.length} items
+          </p>
+        )}
       </div>
+
+      {/* States */}
+      {isLoading && (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 divide-x divide-y border border-border rounded-xl overflow-hidden mb-8">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <FoodCardSkeleton key={i} />
+          ))}
+        </div>
+      )}
+
+      {!isLoading && error && <ErrorState />}
+
+      {!isLoading && !error && foods.length === 0 && <EmptyState />}
+
+      {!isLoading && !error && foods.length > 0 && (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 divide-x divide-y border border-border rounded-xl overflow-hidden mb-8">
+          {foods.map((food) => (
+            <FoodCard key={food.id} food={food} />
+          ))}
+        </div>
+      )}
 
       <div className="flex justify-center mb-12">
         <PaginationDemo />
