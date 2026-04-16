@@ -5,13 +5,14 @@ import { Input } from "@/components/ui/input";
 import { PaginationDemo } from "@/components/Pagination";
 import Testimonials from "@/components/Testimonials";
 import { playfair } from "@/data/fonts";
-import { Search, Clock, ShoppingCart, ChevronRight} from "lucide-react";
+import { Search, Clock, ShoppingCart, ChevronRight, Check, Trash2} from "lucide-react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import { useGetAllFoods } from "@/hooks/foods/useGetAllFoods";
 import FoodCardSkeleton from "@/components/FoodSkeleton";
 import { Badge } from "@/components/ui/badge";
-import { useAddItemToCart } from "@/hooks/cart/useCart";
+import { useAddItemToCart, useGetAllCartItems } from "@/hooks/cart/useCart";
+import { CartItemModel } from "@/types/cart";
 
 interface Food {
   id: string;
@@ -33,18 +34,23 @@ function FoodCard({ food }: { food: Food }) {
   const router = useRouter();
 
   const { mutate: addToCart, isPending } = useAddItemToCart();
+  // const { mutate: removeFromCart, isPending: isRemoving } = useRemoveCartItem(); // add if you have this hook
+  const { data: cartData } = useGetAllCartItems();
+
+  // Check if this food is already in cart
+  const cartItems = (cartData?.data?.items as CartItemModel[]) ?? [];
+  console.log("+++++++++++++++++zzzzzzzzzzz" + cartItems)
+  const isInCart = cartItems.some((item) => item.foodId === food.id);
+
   const handleAddToCart = () => {
-    addToCart({
-      foodId: food.id,
-      quantity: 1,
-      price: food.price
-    },
-    {
-      onSuccess: () => console.log("added to cart"),
-      onError: (err) => console.error("failed to add to cart")
-    }
-  )
-  }
+    addToCart(
+      { foodId: food.id, quantity: 1, price: food.price },
+      {
+        onSuccess: () => console.log("added to cart"),
+        onError: (err) => console.error("failed to add to cart", err),
+      }
+    );
+  };
 
   return (
     <div className="bg-card flex flex-col border-b border-border group">
@@ -57,15 +63,10 @@ function FoodCard({ food }: { food: Food }) {
           className="object-cover transition-transform duration-500 group-hover:scale-105"
           unoptimized
         />
-        {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-
-        {/* Price — bottom left over gradient */}
-        <Badge  className="absolute bottom-3 left-3 text-[13px] font-semibold text-black tracking-wide bg-amber-100">
+        <Badge className="absolute bottom-3 left-3 text-[13px] font-semibold text-black tracking-wide bg-amber-100">
           RWF {food.price.toLocaleString()}
         </Badge>
-
-        {/* Delivery time — bottom right */}
         <span className="absolute bottom-3 right-3 flex items-center gap-1 text-[11px] font-medium text-white/90">
           <Clock className="w-3 h-3" />
           {food.deliveryTime} min
@@ -91,16 +92,39 @@ function FoodCard({ food }: { food: Food }) {
           View recipe
           <ChevronRight className="w-3.5 h-3.5" />
         </button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-xs font-medium cursor-pointer shrink-0 gap-1.5"
-          onClick={handleAddToCart}
-          disabled={isPending}
-        >
-          <ShoppingCart className="w-3.5 h-3.5" />
-          {isPending ? "Adding..." : "Add to Cart"}
-        </Button>
+
+        {isInCart ? (
+          <button
+            className="
+              group/cart flex items-center gap-1.5 text-xs font-medium shrink-0
+              px-3 py-1.5 rounded-md border transition-all duration-200
+              border-green-600 bg-green-50 text-green-700
+              hover:border-red-400 hover:bg-red-50 hover:text-red-600
+            "
+            onClick={() => {
+              // call removeFromCart(food.id) if you have the hook
+              console.log("remove from cart", food.id);
+            }}
+          >
+            {/* Default: checkmark */}
+            <Check className="w-3.5 h-3.5 group-hover/cart:hidden" />
+            {/* Hover: trash */}
+            <Trash2 className="w-3.5 h-3.5 hidden group-hover/cart:block" />
+            <span className="group-hover/cart:hidden">In cart</span>
+            <span className="hidden group-hover/cart:inline">Remove</span>
+          </button>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs font-medium cursor-pointer shrink-0 gap-1.5"
+            onClick={handleAddToCart}
+            disabled={isPending}
+          >
+            <ShoppingCart className="w-3.5 h-3.5" />
+            {isPending ? "Adding..." : "Add to cart"}
+          </Button>
+        )}
       </div>
     </div>
   );

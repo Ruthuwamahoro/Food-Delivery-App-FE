@@ -3,7 +3,7 @@
 import { playfair } from "@/data/fonts";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,10 +16,11 @@ import {
   CreditCard, Receipt, MapPin,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useGetAllCartItems } from "@/hooks/cart/useCart";
+import { useGetAllCartItems, useUpdateCartItemQuantity, useRemoveCartItem } from "@/hooks/cart/useCart";
 
 interface CartItem {
   id: string;
+  foodId: string;
   title: string;
   image: string;
   price: number;
@@ -28,75 +29,42 @@ interface CartItem {
 }
 
 export default function CartPage() {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [orderPlaced, setOrderPlaced] = useState(false);
   const [name, setName]       = useState("");
   const [email, setEmail]     = useState("");
   const [address, setAddress] = useState("");
   const router = useRouter();
 
   const { data, isPending, error } = useGetAllCartItems();
+  const { mutate: updateQuantity, isPending: isUpdating } = useUpdateCartItemQuantity();
+  const { mutate: removeItem, isPending: isRemoving } = useRemoveCartItem();
 
-  // Map API items into local state
-  useEffect(() => {
-    if (data?.data?.items) {
-      const mapped: CartItem[] = data.data.items.map((item: any) => ({
-        id:         item.foodId,
-        title:      item.foodName,
-        image:      item.foodPicture,
-        price:      item.foodPrice,
-        quantity:   item.quantity,
-        totalPrice: item.totalPrice,   // ← from backend
-      }));
-      setItems(mapped);
-    }
-  }, [data]);
+  const items: CartItem[] = (data?.data?.items ?? []).map((item: any) => ({
+    
+    id:         item.id,
+    foodId:     item.foodId,
+    title:      item.foodName,
+    image:      item.foodPicture,
+    price:      item.foodPrice,
+    quantity:   item.quantity,
+    totalPrice: item.totalPrice,
+  }));
 
-  // Pre-fill name/email from API user
-  useEffect(() => {
-    if (data?.data?.user) {
-      setName(data.data.user.name ?? "");
-      setEmail(data.data.user.email ?? "");
-    }
-  }, [data]);
-
-  // Use backend-calculated total directly
   const total: number = data?.data?.totalAmount ?? 0;
 
-  function increaseQty(id: string) {
-    setItems((prev) =>
-      prev.map((i) =>
-        i.id === id
-          ? { ...i, quantity: i.quantity + 1, totalPrice: i.price * (i.quantity + 1) }
-          : i
-      )
-    );
+  function increaseQty(item: CartItem) {
+    updateQuantity({ itemId: item.id, quantity: item.quantity + 1 });
   }
 
-  function decreaseQty(id: string) {
-    setItems((prev) =>
-      prev
-        .map((i) =>
-          i.id === id
-            ? { ...i, quantity: i.quantity - 1, totalPrice: i.price * (i.quantity - 1) }
-            : i
-        )
-        .filter((i) => i.quantity > 0)
-    );
-  }
-
-  function removeItem(id: string) {
-    setItems((prev) => prev.filter((i) => i.id !== id));
-  }
-
-  function clearCart() {
-    setItems([]);
+  function decreaseQty(item: CartItem) {
+    if (item.quantity === 1) {
+      removeItem(item.id);
+      return;
+    }
+    updateQuantity({ itemId: item.id, quantity: item.quantity - 1 });
   }
 
   function handleOrder() {
     if (!name || !email || !address) return;
-    setOrderPlaced(true);
-    clearCart();
     router.push("/checkout");
   }
 
@@ -131,7 +99,7 @@ export default function CartPage() {
   }
 
   /* ── Empty ── */
-  if (!items.length && !orderPlaced) {
+  if (!items.length) {
     return (
       <main className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="text-center max-w-sm">
@@ -177,84 +145,95 @@ export default function CartPage() {
         <div className="grid lg:grid-cols-[1fr_360px] gap-6 items-start">
 
           {/* ── Left: items ── */}
-          <div className="flex flex-col gap-px bg-gray-900 border border-border overflow-hidden px-7 py-9">
-            {items.map((item, idx) => (
-              <div
-                key={item.id}
-                className={cn(
-                  "bg-card flex",
-                  idx === 0 && "rounded-t-2xl",
-                  idx === items.length - 1 && "rounded-b-2xl"
-                )}
-              >
-                {/* Image */}
-                <div className="relative w-[110px] h-[100px] shrink-0 bg-muted overflow-hidden mx-6 my-5">
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    fill
-                    className="object-cover rounded-2xl"
-                  />
-                </div>
+          <div className="flex flex-col bg-gray-900 border border-border overflow-hidden px-7 py-9">
 
-                {/* Body */}
-                <div className="flex-1 px-4 py-3 flex flex-col justify-between min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className={`${playfair.className} text-[1rem] font-normal leading-snug truncate`}>
-                      {item.title}
-                    </h3>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 rounded-full text-muted-foreground hover:text-destructive shrink-0"
-                      onClick={() => removeItem(item.id)}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
+            {/* Keyed list in its own container */}
+            <div className="flex flex-col gap-px">
+              {items.map((item, idx) => {
+                return (
+                  <div
+                    key={item.id ?? idx}
+                    className={cn(
+                      "bg-card flex",
+                      idx === 0 && "rounded-t-2xl",
+                      idx === items.length - 1 && "rounded-b-2xl"
+                    )}
+                  >
+                    {/* Image */}
+                    <div className="relative w-[110px] h-[100px] shrink-0 bg-muted overflow-hidden mx-6 my-5">
+                      <Image
+                        src={item.image}
+                        alt={item.title}
+                        fill
+                        className="object-cover rounded-2xl"
+                        unoptimized
+                      />
+                    </div>
 
-                  {/* Price + stepper */}
-                  <div className="flex items-center justify-between mt-2">
-                    <p className="text-[15px] font-medium text-foreground">
-                      {item.totalPrice.toLocaleString()} RWF
-                      <span className="text-[11px] text-muted-foreground font-light ml-1">
-                        × {item.quantity}
-                      </span>
-                    </p>
+                    {/* Body */}
+                    <div className="flex-1 px-4 py-3 flex flex-col justify-between min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className={`${playfair.className} text-[1rem] font-normal leading-snug truncate`}>
+                          {item.title}
+                        </h3>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 rounded-full text-muted-foreground hover:text-destructive shrink-0"
+                          onClick={() => removeItem(item.id)}
+                          disabled={isRemoving}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
 
-                    <div className="flex items-center border border-border rounded-xl overflow-hidden">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 rounded-none border-0 text-muted-foreground"
-                        onClick={() => decreaseQty(item.id)}
-                      >
-                        <Minus className="w-3 h-3" />
-                      </Button>
-                      <span className="w-7 text-center text-[13px] font-medium select-none">
-                        {item.quantity}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 rounded-none border-0 text-muted-foreground"
-                        onClick={() => increaseQty(item.id)}
-                      >
-                        <Plus className="w-3 h-3" />
-                      </Button>
+                      {/* Price + stepper */}
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-[15px] font-medium text-foreground">
+                          {item.totalPrice.toLocaleString()} RWF
+                          <span className="text-[11px] text-muted-foreground font-light ml-1">
+                            × {item.quantity}
+                          </span>
+                        </p>
+
+                        <div className="flex items-center border border-border rounded-xl overflow-hidden">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 rounded-none border-0 text-muted-foreground"
+                            onClick={() => decreaseQty(item)}
+                            disabled={isUpdating || isRemoving}
+                          >
+                            <Minus className="w-3 h-3" />
+                          </Button>
+                          <span className="w-7 text-center text-[13px] font-medium select-none">
+                            {isUpdating ? "…" : item.quantity}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 rounded-none border-0 text-muted-foreground"
+                            onClick={() => increaseQty(item)}
+                            disabled={isUpdating || isRemoving}
+                          >
+                            <Plus className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                );
+              })}
+            </div>
 
-            {/* Clear cart footer */}
-            <div className="bg-card px-4 py-3 flex justify-end border-t border-border">
+            {/* Clear cart footer — sibling of the list, not inside it */}
+            <div className="bg-card px-4 py-3 flex justify-end border-t border-border mt-px">
               <Button
                 variant="ghost"
                 size="sm"
                 className="text-[12px] text-muted-foreground gap-1.5 h-7"
-                onClick={clearCart}
+                onClick={() => items.forEach((item) => removeItem(item.id))}
+                disabled={isRemoving}
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Clear cart
@@ -277,8 +256,8 @@ export default function CartPage() {
               </CardHeader>
 
               <CardContent className="px-5 pb-4 flex flex-col gap-2.5">
-                {items.map((item) => (
-                  <div key={item.id} className="flex justify-between items-center">
+                {items.map((item, idx) => (
+                  <div key={item.id ?? idx} className="flex justify-between items-center">
                     <span className="text-[13px] text-muted-foreground truncate max-w-[190px]">
                       {item.title}
                       <span className="text-muted-foreground/50 ml-1">×{item.quantity}</span>

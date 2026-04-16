@@ -1,15 +1,30 @@
 "use client"
 import { playfair } from "@/data/fonts"
-import { ShoppingCart } from "lucide-react"
+import { ShoppingCart, LogOut, User, ChevronDown } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 import LoginPage from "./Login-page"
 import { useGetAllCartItems } from "@/hooks/cart/useCart"
+import { useGetUserInfo } from "@/hooks/food/useGetProfile"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { ProfileModel } from "@/types/user"
 
 export default function Header() {
   const [isLoggedIn, isDisplayLoggedIn] = useState(false)
   const { data, isPending } = useGetAllCartItems()
+  const { data: profile, isPending: isProfileLoading } = useGetUserInfo()
+
+  console.log("profile-------------" + profile?.user)
+
+  const user: ProfileModel | null = profile?.data ?? null
 
   const cartCount: number =
     data?.data?.items?.reduce((sum: number, item: any) => sum + item.quantity, 0) ?? 0
@@ -28,37 +43,30 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
 
+            {/* Logo */}
             <div className="flex items-center gap-2">
               <span className={`${playfair.className} text-xl font-normal text-white leading-tight`}>
                 Delicious Recipes
               </span>
             </div>
 
+            {/* Nav links */}
             <div className="hidden md:flex items-center gap-6 lg:gap-8">
               <Link
                 href="/"
-                className="text-white hover:text-gray-300 font-medium transition-colors duration-200 hover:underline-offset-4 hover:font-semibold"
+                className="text-white hover:text-gray-300 font-medium transition-colors duration-200"
               >
                 Home
               </Link>
-              <span
-                className="text-white hover:text-gray-300 font-medium transition-colors duration-200 hover:underline-offset-4 hover:font-semibold cursor-pointer"
-                onClick={() => isDisplayLoggedIn(true)}
-              >
-                Login
-              </span>
+
+              {/* Cart */}
               <Link
                 href="/cart"
-                className="relative flex items-center gap-1.5 text-white hover:text-gray-300 font-medium transition-colors duration-200 hover:underline-offset-4 hover:font-semibold"
+                className="relative flex items-center gap-1.5 text-white hover:text-gray-300 font-medium transition-colors duration-200"
               >
                 <span className="relative">
                   <ShoppingCart size={22} />
-                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 leading-none"></span>
-                  {isPending ? 
-                                      <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 leading-none">
-                                      0
-                                    </span>
-                   : cartCount > 0 && (
+                  {!isPending && cartCount > 0 && (
                     <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 leading-none">
                       {cartCount > 99 ? "99+" : cartCount}
                     </span>
@@ -66,8 +74,93 @@ export default function Header() {
                 </span>
                 <span className="text-xl">Cart</span>
               </Link>
+
+              {/* Profile or Login */}
+              {isProfileLoading ? (
+                <div className="w-8 h-8 rounded-full bg-gray-700 animate-pulse" />
+              ) : user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors focus:outline-none">
+                      {user.picture ? (
+                        <Image
+                          src={user.picture}
+                          alt={user.fullName}
+                          width={32}
+                          height={32}
+                          className="rounded-full object-cover border border-gray-600"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-sm font-semibold">
+                          {user.fullName?.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <span className="text-sm font-medium hidden lg:block">{user.fullName}</span>
+                      <ChevronDown className="w-4 h-4 opacity-60" />
+                    </button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel className="pb-2">
+                      <div className="flex items-center gap-3">
+                        {user.picture ? (
+                          <Image
+                            src={user.picture}
+                            alt={user.fullName}
+                            width={36}
+                            height={36}
+                            className="rounded-full object-cover border border-border"
+                            unoptimized
+                          />
+                        ) : (
+                          <div className="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                            {user.fullName?.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-sm font-medium text-foreground truncate">
+                            {user.fullName}
+                          </span>
+                          <span className="text-xs text-muted-foreground truncate">
+                            {user.email}
+                          </span>
+                        </div>
+                      </div>
+                    </DropdownMenuLabel>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem className="gap-2 text-sm cursor-pointer">
+                      <User className="w-4 h-4 text-muted-foreground" />
+                      Profile
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem
+                      className="gap-2 text-sm text-red-500 focus:text-red-500 focus:bg-red-50 cursor-pointer"
+                      onClick={() => {
+                        // call your logout function here
+                        console.log("logout")
+                      }}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <span
+                  className="text-white hover:text-gray-300 font-medium transition-colors duration-200 cursor-pointer"
+                  onClick={() => isDisplayLoggedIn(true)}
+                >
+                  Login
+                </span>
+              )}
             </div>
 
+            {/* Mobile menu button */}
             <button
               className="md:hidden p-2 text-gray-700 hover:text-orange-600 transition-colors"
               aria-label="Menu"
@@ -80,6 +173,7 @@ export default function Header() {
         </div>
       </nav>
 
+      {/* Hero banner */}
       <div className="relative w-full h-56 sm:h-56 md:h-64 lg:h-72 overflow-hidden">
         <Image
           src="/images/header.jpg"
