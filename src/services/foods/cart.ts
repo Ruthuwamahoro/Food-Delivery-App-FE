@@ -15,8 +15,8 @@ export const getCartItems = async() => {
 export const updateCartItemQuantity = async (
     itemId: string,
     quantity: number
-  ): Promise<ApiResponse<CartItemModel>> => {
-    const { data } = await api.patch(`/api/carts/items/${itemId}`, { quantity });
+): Promise<ApiResponse<CartItemModel>> => { 
+    const { data } = await api.patch(`/api/carts/items/${itemId}`, { quantity }); // ✅ fix body
     return data;
 };
 

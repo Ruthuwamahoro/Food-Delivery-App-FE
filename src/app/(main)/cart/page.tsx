@@ -32,27 +32,31 @@ export default function CartPage() {
   const [name, setName]       = useState("");
   const [email, setEmail]     = useState("");
   const [address, setAddress] = useState("");
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+
   const router = useRouter();
 
   const { data, isPending, error } = useGetAllCartItems();
-  const { mutate: updateQuantity, isPending: isUpdating } = useUpdateCartItemQuantity();
+  const { mutate: updateQuantity, isPending: isUpdating, variables } = useUpdateCartItemQuantity();
   const { mutate: removeItem, isPending: isRemoving } = useRemoveCartItem();
-
   const items: CartItem[] = (data?.data?.items ?? []).map((item: any) => ({
     
-    id:         item.id,
+    id:         item.cartItemId,
     foodId:     item.foodId,
     title:      item.foodName,
     image:      item.foodPicture,
     price:      item.foodPrice,
-    quantity:   item.quantity,
+    quantity:   quantities[item.cartItemId] ?? item.quantity,
     totalPrice: item.totalPrice,
   }));
+
 
   const total: number = data?.data?.totalAmount ?? 0;
 
   function increaseQty(item: CartItem) {
-    updateQuantity({ itemId: item.id, quantity: item.quantity + 1 });
+    const newQty = item.quantity + 1;
+    setQuantities(prev => ({ ...prev, [item.id]: newQty })); // ✅ instant UI update
+    updateQuantity({ itemId: item.id, quantity: newQty });
   }
 
   function decreaseQty(item: CartItem) {
@@ -60,12 +64,21 @@ export default function CartPage() {
       removeItem(item.id);
       return;
     }
-    updateQuantity({ itemId: item.id, quantity: item.quantity - 1 });
+    const newQty = item.quantity - 1;
+    setQuantities(prev => ({ ...prev, [item.id]: newQty })); // ✅ instant UI update
+    updateQuantity({ itemId: item.id, quantity: newQty });
   }
 
   function handleOrder() {
     if (!name || !email || !address) return;
     router.push("/checkout");
+  }
+
+  function handleQtyInput(item: CartItem, value: string) {
+    const parsed = parseInt(value);
+    if (isNaN(parsed) || parsed < 1) return;
+    setQuantities(prev => ({ ...prev, [item.id]: parsed }));
+    updateQuantity({ itemId: item.id, quantity: parsed });
   }
 
   /* ── Loading ── */
@@ -195,6 +208,7 @@ export default function CartPage() {
                             × {item.quantity}
                           </span>
                         </p>
+                        <p>{item.id}</p>
 
                         <div className="flex items-center border border-border rounded-xl overflow-hidden">
                           <Button
@@ -202,19 +216,30 @@ export default function CartPage() {
                             size="icon"
                             className="h-7 w-7 rounded-none border-0 text-muted-foreground"
                             onClick={() => decreaseQty(item)}
-                            disabled={isUpdating || isRemoving}
+                            disabled={isRemoving || (isUpdating && variables?.itemId === item.id)}
                           >
                             <Minus className="w-3 h-3" />
                           </Button>
-                          <span className="w-7 text-center text-[13px] font-medium select-none">
-                            {isUpdating ? "…" : item.quantity}
-                          </span>
+
+                          {/* ✅ Shadcn Input for direct number editing */}
+                          <Input
+                            type="number"
+                            min={1}
+                            value={item.quantity}
+                            onChange={(e) => handleQtyInput(item, e.target.value)}
+                            className="h-7 w-10 text-center text-[13px] font-medium border-0 
+                                      rounded-none p-0 focus-visible:ring-0 
+                                      [appearance:textfield] 
+                                      [&::-webkit-outer-spin-button]:appearance-none 
+                                      [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 rounded-none border-0 text-muted-foreground"
                             onClick={() => increaseQty(item)}
-                            disabled={isUpdating || isRemoving}
+                            disabled={isRemoving || (isUpdating && variables?.itemId === item.id)}
                           >
                             <Plus className="w-3 h-3" />
                           </Button>
