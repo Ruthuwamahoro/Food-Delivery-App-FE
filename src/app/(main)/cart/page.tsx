@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGetAllCartItems, useUpdateCartItemQuantity, useRemoveCartItem } from "@/hooks/cart/useCart";
+import { useCreateOrder } from "@/hooks/orders/allOrders";
+import toast from "react-hot-toast";
 
 interface CartItem {
   id: string;
@@ -39,6 +41,8 @@ export default function CartPage() {
   const { data, isPending, error } = useGetAllCartItems();
   const { mutate: updateQuantity, isPending: isUpdating, variables } = useUpdateCartItemQuantity();
   const { mutate: removeItem, isPending: isRemoving } = useRemoveCartItem();
+  const { mutate: placeOrder, isPending: isPlacingOrder } = useCreateOrder();
+
   const items: CartItem[] = (data?.data?.items ?? []).map((item: any) => ({
     
     id:         item.cartItemId,
@@ -50,12 +54,13 @@ export default function CartPage() {
     totalPrice: item.totalPrice,
   }));
 
+  
 
   const total: number = data?.data?.totalAmount ?? 0;
 
   function increaseQty(item: CartItem) {
     const newQty = item.quantity + 1;
-    setQuantities(prev => ({ ...prev, [item.id]: newQty })); // ✅ instant UI update
+    setQuantities(prev => ({ ...prev, [item.id]: newQty })); 
     updateQuantity({ itemId: item.id, quantity: newQty });
   }
 
@@ -65,13 +70,21 @@ export default function CartPage() {
       return;
     }
     const newQty = item.quantity - 1;
-    setQuantities(prev => ({ ...prev, [item.id]: newQty })); // ✅ instant UI update
+    setQuantities(prev => ({ ...prev, [item.id]: newQty })); 
     updateQuantity({ itemId: item.id, quantity: newQty });
   }
 
   function handleOrder() {
-    if (!name || !email || !address) return;
-    router.push("/checkout");
+    if (!address) return;
+    placeOrder(undefined, {
+      onSuccess: () => {
+        toast.success("Order placed successfully!");
+        router.push("/checkout"); 
+      },
+      onError: (error: any) => {
+        toast.error(error?.response?.data?.message ?? "Failed to place order");
+      },
+    });
   }
 
   function handleQtyInput(item: CartItem, value: string) {
@@ -208,7 +221,6 @@ export default function CartPage() {
                             × {item.quantity}
                           </span>
                         </p>
-                        <p>{item.id}</p>
 
                         <div className="flex items-center border border-border rounded-xl overflow-hidden">
                           <Button
@@ -221,7 +233,6 @@ export default function CartPage() {
                             <Minus className="w-3 h-3" />
                           </Button>
 
-                          {/* ✅ Shadcn Input for direct number editing */}
                           <Input
                             type="number"
                             min={1}
@@ -251,7 +262,6 @@ export default function CartPage() {
               })}
             </div>
 
-            {/* Clear cart footer — sibling of the list, not inside it */}
             <div className="bg-card px-4 py-3 flex justify-end border-t border-border mt-px">
               <Button
                 variant="ghost"
@@ -266,10 +276,8 @@ export default function CartPage() {
             </div>
           </div>
 
-          {/* ── Right: summary + form ── */}
           <div className="flex flex-col gap-4 lg:sticky lg:top-6">
 
-            {/* Order summary */}
             <Card className="border border-border rounded-2xl p-0 overflow-hidden">
               <CardHeader className="px-5 pt-5 pb-3">
                 <div className="flex items-center gap-2">
@@ -304,7 +312,6 @@ export default function CartPage() {
               </CardContent>
             </Card>
 
-            {/* Delivery form */}
             <Card className="border border-border rounded-2xl p-0 overflow-hidden">
               <CardHeader className="px-5 pt-5 pb-3">
                 <div className="flex items-center gap-2">
@@ -320,7 +327,7 @@ export default function CartPage() {
                   <Label className="text-[12px] text-muted-foreground">Full name</Label>
                   <Input
                     placeholder="Jane Smith"
-                    value={name}
+                    value={data?.data?.user?.name ?? name}
                     onChange={(e) => setName(e.target.value)}
                     className="h-9 text-[13px] rounded-[9px]"
                   />
@@ -330,7 +337,7 @@ export default function CartPage() {
                   <Input
                     type="email"
                     placeholder="jane@email.com"
-                    value={email}
+                    value={data?.data?.user?.email ?? email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="h-9 text-[13px] rounded-[9px]"
                   />
@@ -350,10 +357,10 @@ export default function CartPage() {
                 <Button
                   className="w-full h-11 gap-2 text-sm font-medium"
                   onClick={handleOrder}
-                  disabled={!name || !email || !address || !items.length}
+                  disabled={!address || !items.length || isPlacingOrder}
                 >
                   <CreditCard className="w-4 h-4" />
-                  Place Order · {total.toLocaleString()} RWF
+                  {isPlacingOrder ? "Placing order…" : `Place Order · ${total.toLocaleString()} RWF`}
                 </Button>
               </CardFooter>
             </Card>

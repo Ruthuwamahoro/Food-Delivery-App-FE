@@ -16,12 +16,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  console.log("======================================================OAuthCapture rendered======================================================");
-
   
   return (
-    <html lang="en">
       <body className="bg-background text-foreground"
       >
         <Suspense fallback={null}>
@@ -29,6 +25,5 @@ export default function RootLayout({
         </Suspense>
         {children}
       </body>
-    </html>
   );
 }
