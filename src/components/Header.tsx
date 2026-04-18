@@ -22,8 +22,6 @@ export default function Header() {
   const { data, isPending } = useGetAllCartItems()
   const { data: profile, isPending: isProfileLoading } = useGetUserInfo()
 
-  console.log("profile-------------" + profile?.user)
-
   const user: ProfileModel | null = profile?.data ?? null
 
   const cartCount: number =
