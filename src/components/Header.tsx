@@ -234,7 +234,7 @@ export default function Header() {
                 Home
               </Link>
 
-              <Link
+              {/* <Link
                 href="/cart"
                 className="flex items-center gap-2 text-white hover:text-orange-400 font-medium transition-colors py-1"
                 onClick={() => setMobileOpen(false)}
@@ -246,7 +246,7 @@ export default function Header() {
                     {cartCount > 99 ? "99+" : cartCount}
                   </span>
                 )}
-              </Link>
+              </Link> */}
 
               <div className="border-t border-gray-700 pt-3">
                 <AuthBlock mobile />
@@ -256,7 +256,6 @@ export default function Header() {
         </nav>
       </header>
 
-      {/* ── Hero banner (outside sticky wrapper so it scrolls away) ── */}
       <div className="relative w-full h-56 sm:h-56 md:h-64 lg:h-72 overflow-hidden">
         <Image
           src="/images/header.jpg"
@@ -264,8 +263,8 @@ export default function Header() {
           fill
           sizes="100vw"
           className="object-cover brightness-75"
-          priority           // tells Next.js to <link rel="preload"> this image
-          placeholder="blur" // shows blurDataURL while the real image loads
+          priority           
+          placeholder="blur"
           blurDataURL={HERO_BLUR}
         />
         <div className="absolute inset-0 bg-black/40" />

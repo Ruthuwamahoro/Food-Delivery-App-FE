@@ -87,7 +87,7 @@ function FoodCard({ food }: { food: Food }) {
       <div className="px-5 py-4 border-t border-border flex items-center justify-between gap-3">
         <button
           onClick={() => router.push(`/recipe/${food.id}`)}
-          className="flex items-center gap-1 text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1 text-[12px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
         >
           View recipe
           <ChevronRight className="w-3.5 h-3.5" />
