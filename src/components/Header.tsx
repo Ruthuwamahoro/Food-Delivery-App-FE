@@ -139,7 +139,7 @@ export default function Header() {
 
     return (
       <span
-        className="text-gray-900 hover:text-gray-600 font-medium transition-colors duration-200 cursor-pointer"
+        className="text-gray-900 font-medium transition-colors duration-200 cursor-pointer"
         onClick={() => { setLoginOpen(true); setMobileOpen(false) }}
       >
         Login

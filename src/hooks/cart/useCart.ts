@@ -18,11 +18,11 @@ export const useAddItemToCart = () => {
     })
 }
 
-export const useGetAllCartItems = () => {
+export const useGetAllCartItems = ({ enabled = true }: { enabled?: boolean } = {})  => {
     const { data, isPending, error} = useQuery({
         queryKey: CART_KEYS.all,
         queryFn: getCartItems,
-        
+        enabled,
     })
 
     return {

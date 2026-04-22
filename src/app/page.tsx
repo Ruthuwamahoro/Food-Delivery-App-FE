@@ -13,6 +13,9 @@ import FoodCardSkeleton from "@/components/FoodSkeleton";
 import { Badge } from "@/components/ui/badge";
 import { useAddItemToCart, useGetAllCartItems } from "@/hooks/cart/useCart";
 import { CartItemModel } from "@/types/cart";
+import IsLoggedIn from "@/components/isLoggedIn";
+import { useState } from "react";
+import LoginPage from "@/components/Login-page";
 
 interface Food {
   id: string;
@@ -32,10 +35,12 @@ const getFirstImage = (images: string[] | string): string => {
 
 function FoodCard({ food }: { food: Food }) {
   const router = useRouter();
+  const isLoggedIn = IsLoggedIn();
+  const [ loginOpen , setLoginOpen ] = useState(false);
 
   const { mutate: addToCart, isPending } = useAddItemToCart();
   // const { mutate: removeFromCart, isPending: isRemoving } = useRemoveCartItem(); // add if you have this hook
-  const { data: cartData } = useGetAllCartItems();
+  const { data: cartData } = useGetAllCartItems({ enabled: isLoggedIn });
 
   // Check if this food is already in cart
   const cartItems = (cartData?.data?.items as CartItemModel[]) ?? [];
@@ -43,6 +48,10 @@ function FoodCard({ food }: { food: Food }) {
   const isInCart = cartItems.some((item) => item.foodId === food.id);
 
   const handleAddToCart = () => {
+    if (!isLoggedIn) {
+      setLoginOpen(true);
+      return; 
+    }
     addToCart(
       { foodId: food.id, quantity: 1, price: food.price },
       {
@@ -52,8 +61,12 @@ function FoodCard({ food }: { food: Food }) {
     );
   };
 
+
+
   return (
-    <div className="bg-card flex flex-col border-b border-border group">
+    <>
+      <LoginPage loginOpen={loginOpen} setLoginOpen={setLoginOpen} />
+      <div className="bg-card flex flex-col border-b border-border group">
       {/* Image */}
       <div className="relative w-full h-52 bg-muted overflow-hidden">
         <Image
@@ -127,6 +140,9 @@ function FoodCard({ food }: { food: Food }) {
         )}
       </div>
     </div>
+    
+    </>
+
   );
 }
 
