@@ -17,6 +17,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ProfileModel } from "@/types/user"
 
+//{scrolled ? "max-w-full shadow-[0_8px_6px_-6px_rgba(0,0,0,0.3)]": "shadow-none"}
+
+
 // A tiny warm blur placeholder so the hero image area is never blank.
 // Generated from a 1×1 orange-tinted pixel — replace with your own base64 if you prefer.
 const HERO_BLUR =
@@ -56,7 +59,7 @@ export default function Header() {
   /* ── Shared auth block (used in both desktop & mobile) ── */
   const AuthBlock = ({ mobile = false }: { mobile?: boolean }) => {
     if (isProfileLoading) {
-      return <div className="w-8 h-8 rounded-full bg-gray-700 animate-pulse" />
+      return <div className="w-8 h-8 rounded-full bg-white animate-pulse" />
     }
     if (user) {
       return (
@@ -136,7 +139,7 @@ export default function Header() {
 
     return (
       <span
-        className="text-white hover:text-gray-300 font-medium transition-colors duration-200 cursor-pointer"
+        className="text-gray-900 hover:text-gray-600 font-medium transition-colors duration-200 cursor-pointer"
         onClick={() => { setLoginOpen(true); setMobileOpen(false) }}
       >
         Login
@@ -149,18 +152,17 @@ export default function Header() {
       {/* ── Sticky wrapper ── */}
       <header className="sticky top-0 z-50 w-full">
 
-        {/* ── Nav bar ── */}
+
         <nav
-          className={`w-full bg-gray-900 transition-shadow duration-300 ${
-            scrolled ? "shadow-lg shadow-black/40" : "shadow-md"
-          }`}
+          className={`w-full bg-white transition-shadow duration-300 
+            `}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
 
               {/* Logo */}
               <Link href="/" className="flex items-center gap-2 shrink-0">
-                <span className={`${playfair.className} text-xl font-normal text-white leading-tight`}>
+                <span className={`${playfair.className} text-xl font-normal text-gray-900 leading-tight`}>
                   Delicious Recipes
                 </span>
               </Link>
@@ -169,7 +171,7 @@ export default function Header() {
               <div className="hidden md:flex items-center gap-6 lg:gap-8">
                 <Link
                   href="/"
-                  className="text-white hover:text-gray-300 font-medium transition-colors duration-200"
+                  className="text-gray-900 hover:text-gray-300 font-medium transition-colors duration-200"
                 >
                   Home
                 </Link>
@@ -177,7 +179,7 @@ export default function Header() {
                 {/* Cart */}
                 <Link
                   href="/cart"
-                  className="relative flex items-center gap-1.5 text-white hover:text-gray-300 font-medium transition-colors duration-200"
+                  className="relative flex items-center gap-1.5 text-gray-900 hover:text-gray-300 font-medium transition-colors duration-200"
                 >
                   <span className="relative">
                     <ShoppingCart size={22} />
@@ -197,19 +199,19 @@ export default function Header() {
               <div className="flex md:hidden items-center gap-3">
                 <Link
                   href="/cart"
-                  className="relative text-white hover:text-gray-300 transition-colors"
+                  className="relative text-gray-900 hover:text-gray-300 transition-colors"
                   aria-label="Cart"
                 >
                   <ShoppingCart size={22} />
                   {!isPending && cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 leading-none">
+                    <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] bg-red-500 text-gray-900 text-[10px] font-bold rounded-full flex items-center justify-center px-1 leading-none">
                       {cartCount > 99 ? "99+" : cartCount}
                     </span>
                   )}
                 </Link>
 
                 <button
-                  className="p-2 text-white hover:text-orange-400 transition-colors"
+                  className="p-2 text-gray-900 hover:text-orange-400 transition-colors"
                   aria-label={mobileOpen ? "Close menu" : "Open menu"}
                   onClick={() => setMobileOpen((v) => !v)}
                 >
