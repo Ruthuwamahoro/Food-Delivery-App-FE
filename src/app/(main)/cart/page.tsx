@@ -171,7 +171,7 @@ export default function CartPage() {
         <div className="grid lg:grid-cols-[1fr_360px] gap-6 items-start">
 
           {/* ── Left: items ── */}
-          <div className="flex flex-col bg-gray-900 border border-border overflow-hidden px-7 py-9">
+          <div className="flex flex-col border border-border overflow-hidden px-7 py-9">
 
             {/* Keyed list in its own container */}
             <div className="flex flex-col gap-px">

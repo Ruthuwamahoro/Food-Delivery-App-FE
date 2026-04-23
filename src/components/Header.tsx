@@ -65,7 +65,7 @@ export default function Header() {
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors focus:outline-none">
+            <button className="flex items-center gap-2 text-gray-900 hover:text-gray-600 cursor-pointer transition-colors focus:outline-none">
               {user.picture ? (
                 <Image
                   src={user.picture}
@@ -94,7 +94,7 @@ export default function Header() {
 
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel className="pb-2">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 text-gray-900">
                 {user.picture ? (
                   <Image
                     src={user.picture}
@@ -105,7 +105,7 @@ export default function Header() {
                     unoptimized
                   />
                 ) : (
-                  <div className="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center text-gray-900 text-sm font-semibold shrink-0">
                     {user.fullName?.charAt(0).toUpperCase()}
                   </div>
                 )}
