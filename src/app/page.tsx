@@ -16,6 +16,7 @@ import { CartItemModel } from "@/types/cart";
 import IsLoggedIn from "@/components/isLoggedIn";
 import { useState } from "react";
 import LoginPage from "@/components/Login-page";
+import { HeroSection } from "@/components/HeroSection";
 
 interface Food {
   id: string;
@@ -171,8 +172,10 @@ export default function Home() {
   const foods: Food[] = data?.data ?? [];
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <main className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
       <Header />
+      <HeroSection />
 
       {/* Hero text */}
       <div className="pt-7 mb-8">
